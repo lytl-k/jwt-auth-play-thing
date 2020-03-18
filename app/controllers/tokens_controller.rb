@@ -10,7 +10,17 @@ class TokensController < ApplicationController
 
       json_response({ token: token }, 200)
     else
-      json_response({ errors: { login: 'YOU HAVE FAILED THE TEST OF LIFE AND THINGS!!' } })
+      json_response({ errors: { login: 'YOU HAVE FAILED THE TEST OF LIFE AND THINGS!!' } }, 401)
     end
+  end
+
+  def info
+    token = params[:token]
+    return json_response({ errors: { token: ['is needed as a parameter'] } }, 400) unless token
+
+    token_data = JWT.decode token, ::File.read('.token_secret'), true, { algorithm: 'HS512' }
+    token_data.first[:parsed_exp] = Time.at(token_data.first['exp']) if token_data.first['exp']
+
+    json_response token: token_data
   end
 end
