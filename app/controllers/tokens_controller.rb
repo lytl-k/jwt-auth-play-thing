@@ -15,12 +15,11 @@ class TokensController < ApplicationController
   end
 
   def info
-    token = params[:token]
-    return json_response({ errors: { token: ['is needed as a parameter'] } }, 400) unless token
+    return json_response({ errors: { auth_token: ['is needed as a parameter'] } }, 400) unless params[:auth_token]
 
-    token_data = JWT.decode token, ::File.read('.token_secret'), true, { algorithm: 'HS512' }
+    token_data = JWT.decode(params[:auth_token], ::File.read('.token_secret'), true, { algorithm: 'HS512' })
     token_data.first[:parsed_exp] = Time.at(token_data.first['exp']) if token_data.first['exp']
 
-    json_response token: token_data
+    json_response auth_token: token_data
   end
 end
